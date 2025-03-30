@@ -8,7 +8,7 @@ struct RootView: View {
     var body: some View {
         if let accessGranted = accessGranted {
             if accessGranted {
-                CalendarView()
+                MainTabView(accessGranted: $accessGranted)
             } else {
                 AccessDeniedView()
             }
