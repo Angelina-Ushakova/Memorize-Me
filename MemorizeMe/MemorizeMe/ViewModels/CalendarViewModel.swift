@@ -1,13 +1,16 @@
 import Foundation
 import EventKit
+import SwiftData
 
 class CalendarViewModel: ObservableObject {
     @Published var selectedDate = Date()
     @Published var currentMonth = Calendar.current.component(.month, from: Date())
     @Published var currentYear = Calendar.current.component(.year, from: Date())
     @Published var events: [EventModel] = []
+    @Published var specialDatesForMonth: [Date: [SignificantDate]] = [:]
 
     private let calendarService = CalendarSyncService()
+    private let dateAnalysisService = DateAnalysisService()
 
     enum DisplayMode {
         case monthly, yearly
@@ -48,8 +51,15 @@ class CalendarViewModel: ObservableObject {
         let fetchedEvents = calendarService.fetchEventsModel(startDate: startDate, endDate: endDate)
         self.events = fetchedEvents
     }
+    
+    func loadSpecialDatesForCurrentMonth(modelContext: ModelContext) {
+        specialDatesForMonth = dateAnalysisService.getSpecialDatesForMonth(
+            year: currentYear,
+            month: currentMonth,
+            modelContext: modelContext
+        )
+    }
 
-    /// Получить события за весь год (для YearlyView)
     func getEventsForYear(year: Int) -> [Date: [EventModel]] {
         var components = DateComponents()
         components.year = year
@@ -66,8 +76,40 @@ class CalendarViewModel: ObservableObject {
         }
         return dict
     }
+    
+    func getSpecialDatesForYear(year: Int, modelContext: ModelContext) -> [Date: [SignificantDate]] {
+        var result: [Date: [SignificantDate]] = [:]
+        
+        for month in 1...12 {
+            let monthSpecials = dateAnalysisService.getSpecialDatesForMonth(
+                year: year,
+                month: month,
+                modelContext: modelContext
+            )
+            result.merge(monthSpecials) { existing, new in
+                existing + new
+            }
+        }
+        
+        return result
+    }
+    
+    func hasSpecialDates(for date: Date) -> Bool {
+        let dayKey = Calendar.current.startOfDay(for: date)
+        return specialDatesForMonth[dayKey] != nil && !specialDatesForMonth[dayKey]!.isEmpty
+    }
+    
+    func getSpecialDates(for date: Date) -> [SignificantDate] {
+        let dayKey = Calendar.current.startOfDay(for: date)
+        return specialDatesForMonth[dayKey] ?? []
+    }
 
     func initialize() {
         loadEventsForCurrentMonth()
+    }
+    
+    func initialize(modelContext: ModelContext) {
+        loadEventsForCurrentMonth()
+        loadSpecialDatesForCurrentMonth(modelContext: modelContext)
     }
 }

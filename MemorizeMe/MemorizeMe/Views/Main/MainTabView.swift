@@ -1,11 +1,15 @@
 import SwiftUI
+import SwiftData
 import UIKit
 
 struct MainTabView: View {
     @Binding var accessGranted: Bool?
-    
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var significantDateViewModel: SignificantDateViewModel
+
     @StateObject private var calendarViewModel = CalendarViewModel()
-    
+    @StateObject private var settingsViewModel = SettingsViewModel(isCalendarAccessGranted: true) // Создаём один экземпляр
+
     var body: some View {
         TabViewWithLine {
             TabView {
@@ -15,14 +19,24 @@ struct MainTabView: View {
                         Label("Календарь", systemImage: "calendar")
                     }
                     .onAppear {
-                        calendarViewModel.initialize()
+                        calendarViewModel.initialize(modelContext: modelContext)
                     }
-                
+                    .onChange(of: calendarViewModel.currentMonth) { _ in
+                        calendarViewModel.loadSpecialDatesForCurrentMonth(modelContext: modelContext)
+                    }
+                    .onChange(of: calendarViewModel.currentYear) { _ in
+                        calendarViewModel.loadSpecialDatesForCurrentMonth(modelContext: modelContext)
+                    }
+
+                // Вкладка значимых дат
+                SpecialDatesView()
+                    .tabItem {
+                        Label("Напоминания", systemImage: "bell.badge")
+                    }
+
                 // Вкладка настроек
-                SettingsView(
-                    viewModel: SettingsViewModel(
-                        isCalendarAccessGranted: accessGranted ?? false
-                    ),
+                SettingsViewWithNavigation(
+                    viewModel: settingsViewModel,
                     accessGranted: Binding<Bool>(
                         get: { self.accessGranted ?? false },
                         set: { self.accessGranted = $0 }

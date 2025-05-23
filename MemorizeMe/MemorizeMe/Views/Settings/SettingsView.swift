@@ -49,7 +49,7 @@ struct SettingsView: View {
             }
 
             // -------- ВНЕШНИЙ ВИД --------
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 0) {
                 Text("ВНЕШНИЙ ВИД")
                     .font(.caption)
                     .foregroundColor(.gray)
@@ -78,21 +78,10 @@ struct SettingsView: View {
                             .frame(width: 30)
                         Text("Тема приложения")
                         Spacer()
-                        Picker("", selection: Binding<AppTheme>(
-                            get: {
-                                // Если followSystemTheme — привязываем к системной теме, иначе — к ручной
-                                if viewModel.followSystemTheme {
-                                    return (colorScheme == .dark) ? .dark : .light
-                                } else {
-                                    return viewModel.selectedTheme
-                                }
-                            },
-                            set: { newValue in
-                                if !viewModel.followSystemTheme {
-                                    viewModel.selectedTheme = newValue
-                                }
-                            }
-                        )) {
+                        Picker("", selection: viewModel.followSystemTheme
+                            ? .constant(viewModel.currentTheme)
+                            : $viewModel.selectedTheme
+                        ) {
                             ForEach(AppTheme.allCases) { theme in
                                 Text(theme.title).tag(theme)
                             }
@@ -193,7 +182,6 @@ struct SettingsView: View {
             Task { await viewModel.checkCalendarAccess() }
         }
         .onChange(of: colorScheme) { newScheme in
-            // Автоматически подстраиваемся только если включено следование системе
             if viewModel.followSystemTheme {
                 viewModel.setSystemTheme()
             }

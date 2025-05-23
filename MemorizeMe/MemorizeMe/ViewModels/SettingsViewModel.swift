@@ -16,23 +16,28 @@ final class SettingsViewModel: ObservableObject {
     @Published var isCalendarAccessGranted: Bool
     @Published var followSystemTheme: Bool = false {
         didSet {
-            applyCurrentTheme()
+            if followSystemTheme {
+                setSystemTheme()
+            } else {
+                applyTheme(selectedTheme)
+            }
             saveSettings()
+            objectWillChange.send()
         }
     }
     @Published var selectedTheme: AppTheme = .light {
         didSet {
             if !followSystemTheme {
                 applyTheme(selectedTheme)
-                saveSettings()
             }
+            saveSettings()
         }
     }
-    
+
     private let calendarService = CalendarSyncService()
     private let followKey = "followSystemTheme"
     private let themeKey = "selectedTheme"
-    
+
     init(isCalendarAccessGranted: Bool) {
         self.isCalendarAccessGranted = isCalendarAccessGranted
         loadSettings()
@@ -46,20 +51,17 @@ final class SettingsViewModel: ObservableObject {
            let theme = AppTheme(rawValue: themeRaw) {
             self.selectedTheme = theme
         }
-        applyCurrentTheme()
-    }
-
-    private func saveSettings() {
-        UserDefaults.standard.set(selectedTheme.rawValue, forKey: themeKey)
-        UserDefaults.standard.set(followSystemTheme, forKey: followKey)
-    }
-
-    private func applyCurrentTheme() {
+        // После загрузки настроек сразу применяем тему
         if followSystemTheme {
             setSystemTheme()
         } else {
             applyTheme(selectedTheme)
         }
+    }
+
+    private func saveSettings() {
+        UserDefaults.standard.set(selectedTheme.rawValue, forKey: themeKey)
+        UserDefaults.standard.set(followSystemTheme, forKey: followKey)
     }
 
     func applyTheme(_ theme: AppTheme) {
@@ -69,11 +71,26 @@ final class SettingsViewModel: ObservableObject {
             window.overrideUserInterfaceStyle = style
         }
     }
-    
+
     func setSystemTheme() {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
         for window in windowScene.windows {
             window.overrideUserInterfaceStyle = .unspecified
+        }
+    }
+
+    /// Вычисляемое свойство для актуальной темы (учитывает системную)
+    var currentTheme: AppTheme {
+        if followSystemTheme {
+            // Получаем системную тему (через keyWindow/triatCollection)
+            let keyWindow = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+                .first { $0.isKeyWindow }
+            let style = keyWindow?.traitCollection.userInterfaceStyle ?? .light
+            return (style == .dark) ? .dark : .light
+        } else {
+            return selectedTheme
         }
     }
 
@@ -82,11 +99,11 @@ final class SettingsViewModel: ObservableObject {
             UIApplication.shared.open(url)
         }
     }
-    
+
     func resetAllData() {
         print("Сброс всех данных произведен")
     }
-    
+
     func checkCalendarAccess() async {
         if let status = await calendarService.getAuthorizationStatus() {
             DispatchQueue.main.async {

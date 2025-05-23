@@ -6,8 +6,42 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		EBFB60BD2DE0320500F94BF4 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBFB60BC2DE0320500F94BF4 /* WidgetKit.framework */; };
+		EBFB60BF2DE0320500F94BF4 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBFB60BE2DE0320500F94BF4 /* SwiftUI.framework */; };
+		EBFB60CA2DE0320700F94BF4 /* MemorizeMeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EBFB60BA2DE0320500F94BF4 /* MemorizeMeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EBFB60C82DE0320700F94BF4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 84AE7FC52D501D9000DF28E6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EBFB60B92DE0320500F94BF4;
+			remoteInfo = MemorizeMeWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		EBFB60CF2DE0320700F94BF4 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				EBFB60CA2DE0320700F94BF4 /* MemorizeMeWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		84AE7FCD2D501D9000DF28E6 /* MemorizeMe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemorizeMe.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBFB60BA2DE0320500F94BF4 /* MemorizeMeWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MemorizeMeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBFB60BC2DE0320500F94BF4 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		EBFB60BE2DE0320500F94BF4 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		EBFB60D12DE0339A00F94BF4 /* MemorizeMeWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MemorizeMeWidgetExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -17,6 +51,13 @@
 				Info.plist,
 			);
 			target = 84AE7FCC2D501D9000DF28E6 /* MemorizeMe */;
+		};
+		EBFB60CE2DE0320700F94BF4 /* Exceptions for "MemorizeMeWidget" folder in "MemorizeMeWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EBFB60B92DE0320500F94BF4 /* MemorizeMeWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -29,6 +70,14 @@
 			path = MemorizeMe;
 			sourceTree = "<group>";
 		};
+		EBFB60C02DE0320500F94BF4 /* MemorizeMeWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EBFB60CE2DE0320700F94BF4 /* Exceptions for "MemorizeMeWidget" folder in "MemorizeMeWidgetExtension" target */,
+			);
+			path = MemorizeMeWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,13 +88,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EBFB60B72DE0320500F94BF4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EBFB60BF2DE0320500F94BF4 /* SwiftUI.framework in Frameworks */,
+				EBFB60BD2DE0320500F94BF4 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		84AE7FC42D501D9000DF28E6 = {
 			isa = PBXGroup;
 			children = (
+				EBFB60D12DE0339A00F94BF4 /* MemorizeMeWidgetExtension.entitlements */,
 				84AE7FCF2D501D9000DF28E6 /* MemorizeMe */,
+				EBFB60C02DE0320500F94BF4 /* MemorizeMeWidget */,
+				EBFB60BB2DE0320500F94BF4 /* Frameworks */,
 				84AE7FCE2D501D9000DF28E6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,8 +115,18 @@
 			isa = PBXGroup;
 			children = (
 				84AE7FCD2D501D9000DF28E6 /* MemorizeMe.app */,
+				EBFB60BA2DE0320500F94BF4 /* MemorizeMeWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		EBFB60BB2DE0320500F94BF4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EBFB60BC2DE0320500F94BF4 /* WidgetKit.framework */,
+				EBFB60BE2DE0320500F94BF4 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -68,10 +139,12 @@
 				84AE7FC92D501D9000DF28E6 /* Sources */,
 				84AE7FCA2D501D9000DF28E6 /* Frameworks */,
 				84AE7FCB2D501D9000DF28E6 /* Resources */,
+				EBFB60CF2DE0320700F94BF4 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				EBFB60C92DE0320700F94BF4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				84AE7FCF2D501D9000DF28E6 /* MemorizeMe */,
@@ -82,6 +155,28 @@
 			productName = MemorizeMe;
 			productReference = 84AE7FCD2D501D9000DF28E6 /* MemorizeMe.app */;
 			productType = "com.apple.product-type.application";
+		};
+		EBFB60B92DE0320500F94BF4 /* MemorizeMeWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EBFB60CB2DE0320700F94BF4 /* Build configuration list for PBXNativeTarget "MemorizeMeWidgetExtension" */;
+			buildPhases = (
+				EBFB60B62DE0320500F94BF4 /* Sources */,
+				EBFB60B72DE0320500F94BF4 /* Frameworks */,
+				EBFB60B82DE0320500F94BF4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EBFB60C02DE0320500F94BF4 /* MemorizeMeWidget */,
+			);
+			name = MemorizeMeWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = MemorizeMeWidgetExtension;
+			productReference = EBFB60BA2DE0320500F94BF4 /* MemorizeMeWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -94,6 +189,9 @@
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					84AE7FCC2D501D9000DF28E6 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					EBFB60B92DE0320500F94BF4 = {
 						CreatedOnToolsVersion = 16.2;
 					};
 				};
@@ -113,12 +211,20 @@
 			projectRoot = "";
 			targets = (
 				84AE7FCC2D501D9000DF28E6 /* MemorizeMe */,
+				EBFB60B92DE0320500F94BF4 /* MemorizeMeWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		84AE7FCB2D501D9000DF28E6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBFB60B82DE0320500F94BF4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -135,7 +241,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EBFB60B62DE0320500F94BF4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EBFB60C92DE0320700F94BF4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EBFB60B92DE0320500F94BF4 /* MemorizeMeWidgetExtension */;
+			targetProxy = EBFB60C82DE0320700F94BF4 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		84AE7FDB2D501D9600DF28E6 /* Debug */ = {
@@ -264,6 +385,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MemorizeMe/MemorizeMe.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MemorizeMe/Preview Content\"";
@@ -296,6 +418,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MemorizeMe/MemorizeMe.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MemorizeMe/Preview Content\"";
@@ -323,6 +446,64 @@
 			};
 			name = Release;
 		};
+		EBFB60CC2DE0320700F94BF4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = MemorizeMeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5HWVRJALTM;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MemorizeMeWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MemorizeMeWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.hse.Ushakova.MemorizeMe.MemorizeMeWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EBFB60CD2DE0320700F94BF4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = MemorizeMeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5HWVRJALTM;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MemorizeMeWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MemorizeMeWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.hse.Ushakova.MemorizeMe.MemorizeMeWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -340,6 +521,15 @@
 			buildConfigurations = (
 				84AE7FDE2D501D9600DF28E6 /* Debug */,
 				84AE7FDF2D501D9600DF28E6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EBFB60CB2DE0320700F94BF4 /* Build configuration list for PBXNativeTarget "MemorizeMeWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EBFB60CC2DE0320700F94BF4 /* Debug */,
+				EBFB60CD2DE0320700F94BF4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
