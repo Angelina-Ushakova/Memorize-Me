@@ -1,8 +1,11 @@
 import SwiftUI
+import SwiftData
 
 struct SettingsView: View {
     @ObservedObject var viewModel: SettingsViewModel
     @Binding var accessGranted: Bool
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var significantDateViewModel: SignificantDateViewModel
 
     @Environment(\.colorScheme) var colorScheme
     @State private var showResetAlert = false
@@ -15,30 +18,63 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top)
 
-            // Секция доступа к календарю
+            // АНАЛИЗ КАЛЕНДАРЯ
             VStack(alignment: .leading, spacing: 10) {
-                Text("ДОСТУП")
+                Text("АНАЛИЗ")
                     .font(.caption)
                     .foregroundColor(.gray)
                     .padding(.horizontal)
-                VStack {
+                
+                VStack(spacing: 0) {
                     HStack {
-                        Image(systemName: "calendar")
+                        Image(systemName: "brain")
                             .foregroundColor(Color("primaryColor"))
                             .frame(width: 30)
-                        Text("Доступ к календарю")
+                        Text("Запустить анализ")
                         Spacer()
-                        if accessGranted {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
+                        if significantDateViewModel.isAnalyzing {
+                            ProgressView()
+                                .scaleEffect(0.8)
                         } else {
-                            Button("Открыть настройки") {
-                                viewModel.openSettings()
+                            Button("Обновить") {
+                                Task {
+                                    await significantDateViewModel.refreshAnalysis(modelContext: modelContext)
+                                }
                             }
                             .foregroundColor(Color("primaryColor"))
                         }
                     }
                     .padding()
+                    
+                    Divider()
+                        .padding(.leading, 46)
+                    
+                    HStack {
+                        Image(systemName: "calendar.badge.clock")
+                            .foregroundColor(Color("primaryColor"))
+                            .frame(width: 30)
+                        Text("Найдено значимых дат")
+                        Spacer()
+                        Text("\(significantDateViewModel.specialDates.count)")
+                            .foregroundColor(.gray)
+                    }
+                    .padding()
+                    
+                    if significantDateViewModel.lastAnalysisDate != nil {
+                        Divider()
+                            .padding(.leading, 46)
+                        
+                        HStack {
+                            Image(systemName: "clock")
+                                .foregroundColor(Color("primaryColor"))
+                                .frame(width: 30)
+                            Text("Последний анализ")
+                            Spacer()
+                            Text(formatLastAnalysisDate())
+                                .foregroundColor(.gray)
+                        }
+                        .padding()
+                    }
                 }
                 .background(Color("backgroundPrimary"))
                 .overlay(
@@ -48,8 +84,8 @@ struct SettingsView: View {
                 .padding(.horizontal)
             }
 
-            // -------- ВНЕШНИЙ ВИД --------
-            VStack(alignment: .leading, spacing: 0) {
+            // ВНЕШНИЙ ВИД
+            VStack(alignment: .leading, spacing: 10) {
                 Text("ВНЕШНИЙ ВИД")
                     .font(.caption)
                     .foregroundColor(.gray)
@@ -78,10 +114,7 @@ struct SettingsView: View {
                             .frame(width: 30)
                         Text("Тема приложения")
                         Spacer()
-                        Picker("", selection: viewModel.followSystemTheme
-                            ? .constant(viewModel.currentTheme)
-                            : $viewModel.selectedTheme
-                        ) {
+                        Picker("", selection: $viewModel.selectedTheme) {
                             ForEach(AppTheme.allCases) { theme in
                                 Text(theme.title).tag(theme)
                             }
@@ -89,6 +122,11 @@ struct SettingsView: View {
                         .pickerStyle(SegmentedPickerStyle())
                         .frame(width: 140)
                         .disabled(viewModel.followSystemTheme)
+                        .onChange(of: viewModel.followSystemTheme) { followSystem in
+                            if followSystem {
+                                viewModel.selectedTheme = viewModel.currentTheme
+                            }
+                        }
                     }
                     .padding(.vertical, 12)
                     .padding(.horizontal)
@@ -103,25 +141,13 @@ struct SettingsView: View {
                 .padding(.bottom, 8)
             }
 
-            // -------- О ПРИЛОЖЕНИИ --------
+            // О ПРИЛОЖЕНИИ
             VStack(alignment: .leading, spacing: 10) {
                 Text("О ПРИЛОЖЕНИИ")
                     .font(.caption)
                     .foregroundColor(.gray)
                     .padding(.horizontal)
                 VStack(spacing: 0) {
-                    HStack {
-                        Image(systemName: "info.circle")
-                            .foregroundColor(Color("primaryColor"))
-                            .frame(width: 30)
-                        Text("Версия приложения")
-                        Spacer()
-                        Text("1.0.0")
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
-                    Divider()
-                        .padding(.leading, 46)
                     NavigationLink(destination: PrivacyPolicyView()) {
                         HStack {
                             Image(systemName: "lock.shield")
@@ -144,7 +170,7 @@ struct SettingsView: View {
                 .padding(.horizontal)
             }
 
-            // -------- СБРОС --------
+            // СБРОС
             Button(action: {
                 showResetAlert = true
             }) {
@@ -164,6 +190,8 @@ struct SettingsView: View {
                 )
                 .padding(.horizontal)
             }
+            .padding(.bottom, 20)
+            
             Spacer()
         }
         .background(Color("backgroundPrimary").edgesIgnoringSafeArea(.all))
@@ -172,26 +200,49 @@ struct SettingsView: View {
                 title: Text("Сбросить напоминания"),
                 message: Text("Вы уверены, что хотите сбросить все настройки и напоминания? Это действие невозможно отменить."),
                 primaryButton: .destructive(Text("Сбросить")) {
-                    viewModel.resetAllData()
+                    Task {
+                        await resetAllData()
+                    }
                 },
                 secondaryButton: .cancel(Text("Отмена"))
             )
         }
         .navigationBarHidden(true)
-        .onAppear {
-            Task { await viewModel.checkCalendarAccess() }
-        }
         .onChange(of: colorScheme) { newScheme in
             if viewModel.followSystemTheme {
                 viewModel.setSystemTheme()
+                viewModel.selectedTheme = viewModel.currentTheme
             }
         }
     }
-}
-
-#Preview {
-    SettingsView(
-        viewModel: SettingsViewModel(isCalendarAccessGranted: true),
-        accessGranted: .constant(true)
-    )
+    
+    private func formatLastAnalysisDate() -> String {
+        guard let date = significantDateViewModel.lastAnalysisDate else { return "Никогда" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        if Calendar.current.isDate(date, inSameDayAs: Date()) {
+            formatter.timeStyle = .short
+            return "Сегодня в \(formatter.string(from: date))"
+        } else if Calendar.current.isDate(date, inSameDayAs: Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()) {
+            formatter.timeStyle = .short
+            return "Вчера в \(formatter.string(from: date))"
+        } else {
+            formatter.dateStyle = .short
+            formatter.timeStyle = .short
+            return formatter.string(from: date)
+        }
+    }
+    
+    private func resetAllData() async {
+        do {
+            try modelContext.delete(model: SignificantDate.self)
+            try modelContext.save()
+            let notificationService = NotificationService()
+            await notificationService.cancelAllNotifications()
+            await significantDateViewModel.loadSpecialDates(modelContext: modelContext)
+            print("Все данные успешно сброшены")
+        } catch {
+            print("Ошибка сброса данных: \(error)")
+        }
+    }
 }

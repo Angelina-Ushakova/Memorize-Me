@@ -19,7 +19,12 @@ final class SettingsViewModel: ObservableObject {
             if followSystemTheme {
                 setSystemTheme()
             } else {
-                applyTheme(selectedTheme)
+                // Сначала сбрасываем на system, потом ручной выбор:
+                setSystemTheme()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                    guard let self = self else { return }
+                    self.applyTheme(self.selectedTheme)
+                }
             }
             saveSettings()
             objectWillChange.send()
@@ -29,8 +34,8 @@ final class SettingsViewModel: ObservableObject {
         didSet {
             if !followSystemTheme {
                 applyTheme(selectedTheme)
+                saveSettings()
             }
-            saveSettings()
         }
     }
 
@@ -51,11 +56,15 @@ final class SettingsViewModel: ObservableObject {
            let theme = AppTheme(rawValue: themeRaw) {
             self.selectedTheme = theme
         }
-        // После загрузки настроек сразу применяем тему
         if followSystemTheme {
             setSystemTheme()
         } else {
-            applyTheme(selectedTheme)
+            // Тот же трюк для первого запуска:
+            setSystemTheme()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+                guard let self = self else { return }
+                self.applyTheme(self.selectedTheme)
+            }
         }
     }
 
@@ -79,10 +88,8 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
-    /// Вычисляемое свойство для актуальной темы (учитывает системную)
     var currentTheme: AppTheme {
         if followSystemTheme {
-            // Получаем системную тему (через keyWindow/triatCollection)
             let keyWindow = UIApplication.shared.connectedScenes
                 .compactMap { $0 as? UIWindowScene }
                 .flatMap { $0.windows }
