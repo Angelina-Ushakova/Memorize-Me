@@ -1,68 +1,35 @@
 import SwiftUI
 
-struct CalendarView: View {
-    @State private var selectedDate = Date()
-    @State private var displayMode: DisplayMode = .monthly
-    @State private var currentMonth = Calendar.current.component(.month, from: Date())
-    @State private var currentYear = Calendar.current.component(.year, from: Date())
+struct MonthlyCalendarView: View {
+    @ObservedObject var viewModel: CalendarViewModel
     
-    enum DisplayMode {
-        case monthly, yearly
-    }
-    
+    // Создаем календарь с понедельником как началом недели
     private var calendar: Calendar {
         var calendar = Calendar.current
         calendar.firstWeekday = 2 // Понедельник как первый день недели
         return calendar
     }
     
+    // Массивы для локализованных названий
     private let weekdaySymbols = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
     private let monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
     
     var body: some View {
-        VStack(spacing: 20) {
-            // Заголовок посередине
-            Text("Календарь")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top)
-            
-            // Кастомный сегмент-переключатель
-            SegmentControl(selection: $displayMode)
-                .frame(width: 280) // Ограничиваем ширину пикера
-            
-            // Отображаем календарь в зависимости от выбранного режима
-            if displayMode == .monthly {
-                monthlyCalendarView
-            } else {
-                Text("Годовой календарь в разработке")
-                    .foregroundColor(.gray)
-                    .padding()
-            }
-            
-            Spacer()
-        }
-        .background(Color.white.edgesIgnoringSafeArea(.all))
-    }
-    
-    private var monthlyCalendarView: some View {
         VStack(spacing: 10) {
-            // Заголовок месяца с кнопками навигации
             HStack {
-                Button(action: previousMonth) {
+                Button(action: { viewModel.moveToPrevoiusMonth() }) {
                     Image(systemName: "chevron.left")
                         .foregroundColor(.gray)
                 }
                 
                 Spacer()
                 
-                Text(monthNames[currentMonth-1] + " " + String(currentYear))
+                Text(monthNames[viewModel.currentMonth-1] + " " + String(viewModel.currentYear))
                     .font(.headline)
                 
                 Spacer()
                 
-                Button(action: nextMonth) {
+                Button(action: { viewModel.moveToNextMonth() }) {
                     Image(systemName: "chevron.right")
                         .foregroundColor(.gray)
                 }
@@ -88,7 +55,7 @@ struct CalendarView: View {
                     if let dayInfo = getDayInfo(at: index) {
                         Button(action: {
                             if dayInfo.isCurrentMonth {
-                                selectedDate = dayInfo.date
+                                viewModel.selectedDate = dayInfo.date
                             }
                         }) {
                             Text("\(dayInfo.day)")
@@ -96,9 +63,9 @@ struct CalendarView: View {
                                 .frame(width: 36, height: 36)
                                 .background(
                                     Circle()
-                                        .fill(isToday(dayInfo.date) ? Color.pink.opacity(0.3) : Color.clear)
+                                        .fill(isToday(dayInfo.date) ? Color("primaryLight6") : Color.clear)
                                 )
-                                .foregroundColor(dayInfo.isCurrentMonth ? .primary : .gray)
+                                .foregroundColor(dayInfo.isCurrentMonth ? (isToday(dayInfo.date) ? Color("textPrimary") : .primary) : .gray)
                         }
                         .disabled(!dayInfo.isCurrentMonth)
                     } else {
@@ -110,13 +77,15 @@ struct CalendarView: View {
             .padding(.horizontal)
         }
         .padding()
-        .background(Color.white)
+        .background(Color("backgroundPrimary"))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color(.systemGray5), lineWidth: 1)
         )
         .padding(.horizontal)
     }
+    
+    // MARK: - Helper Functions
     
     // Функция для получения количества ячеек в сетке календаря
     private func daysInMonthCount() -> Int {
@@ -125,12 +94,14 @@ struct CalendarView: View {
     
     // Функция для получения информации о дне по индексу
     private func getDayInfo(at index: Int) -> DayInfo? {
-        let year = currentYear
-        let month = currentMonth
+        let year = viewModel.currentYear
+        let month = viewModel.currentMonth
         
+        // Получаем первый день текущего месяца
         let dateComponents = DateComponents(year: year, month: month, day: 1)
         let firstDayOfMonth = calendar.date(from: dateComponents)!
         
+        // Вычисляем смещение первого дня месяца
         let firstWeekday = calendar.component(.weekday, from: firstDayOfMonth)
         let offsetDays = (firstWeekday - calendar.firstWeekday + 7) % 7
         
@@ -173,82 +144,19 @@ struct CalendarView: View {
         return nil
     }
     
-    // Структура для информации о дне
-    private struct DayInfo {
-        let date: Date
-        let day: Int
-        let isCurrentMonth: Bool
-    }
-    
     // Проверка, является ли дата сегодняшней
     private func isToday(_ date: Date) -> Bool {
         return calendar.isDate(date, inSameDayAs: Date())
     }
-    
-    // Переход к предыдущему месяцу
-    private func previousMonth() {
-        if currentMonth == 1 {
-            currentMonth = 12
-            currentYear -= 1
-        } else {
-            currentMonth -= 1
-        }
-    }
-    
-    // Переход к следующему месяцу
-    private func nextMonth() {
-        if currentMonth == 12 {
-            currentMonth = 1
-            currentYear += 1
-        } else {
-            currentMonth += 1
-        }
-    }
 }
 
-struct SegmentControl: View {
-    @Binding var selection: CalendarView.DisplayMode
-    
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                // Фон
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.systemGray6))
-                
-                // Индикатор выбранного элемента
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.pink.opacity(0.3))
-                    .frame(width: geometry.size.width / 2)
-                    .offset(x: selection == .monthly ? 0 : geometry.size.width / 2)
-                    .animation(.spring(), value: selection)
-                
-                // Кнопки
-                HStack(spacing: 0) {
-                    Button(action: {
-                        selection = .monthly
-                    }) {
-                        Text("Месяц")
-                            .foregroundColor(.black) // Всегда черный цвет
-                            .frame(width: geometry.size.width / 2, height: geometry.size.height)
-                            .font(.system(size: 16))
-                    }
-                    
-                    Button(action: {
-                        selection = .yearly
-                    }) {
-                        Text("Год")
-                            .foregroundColor(.black) // Всегда черный цвет
-                            .frame(width: geometry.size.width / 2, height: geometry.size.height)
-                            .font(.system(size: 16))
-                    }
-                }
-            }
-        }
-        .frame(height: 40) // Уменьшенная высота
-    }
+// MARK: - Supporting Types
+struct DayInfo {
+    let date: Date
+    let day: Int
+    let isCurrentMonth: Bool
 }
 
 #Preview {
-    CalendarView()
+    MonthlyCalendarView(viewModel: CalendarViewModel())
 }

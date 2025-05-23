@@ -9,7 +9,7 @@ struct AccessDeniedView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 100, height: 100)
-                .foregroundColor(.pink)
+                .foregroundColor(Color("primaryColor"))
 
             Text("Доступ запрещён")
                 .font(.title)
@@ -20,6 +20,7 @@ struct AccessDeniedView: View {
                 .foregroundColor(.gray)
                 .padding(.horizontal, 30)
 
+            // Кнопка настроек
             Button(action: openSettings) {
                 HStack {
                     Image(systemName: "gear")
@@ -28,7 +29,7 @@ struct AccessDeniedView: View {
                 .font(.system(size: 16, weight: .bold))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color.pink)
+                .background(Color("primaryColor"))
                 .foregroundColor(.white)
                 .cornerRadius(12)
                 .shadow(radius: 5)
@@ -38,8 +39,10 @@ struct AccessDeniedView: View {
             Spacer()
         }
         .padding()
+        .background(Color("backgroundPrimary").edgesIgnoringSafeArea(.all))
     }
 
+    // Функция для открытия системных настроек
     private func openSettings() {
         if let url = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(url)

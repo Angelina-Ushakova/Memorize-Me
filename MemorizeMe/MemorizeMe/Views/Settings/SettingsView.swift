@@ -1,124 +1,145 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @ObservedObject var viewModel: SettingsViewModel
     @Binding var accessGranted: Bool
-    @State private var isDarkMode = false
-    @State private var showResetAlert = false
+
     @Environment(\.colorScheme) var colorScheme
-    
-    let calendarService = CalendarSyncService()
-    
+    @State private var showResetAlert = false
+
     var body: some View {
         VStack(spacing: 20) {
-            // Заголовок посередине
             Text("Настройки")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top)
-            
-            // Секция доступа
+
+            // Секция доступа к календарю
             VStack(alignment: .leading, spacing: 10) {
                 Text("ДОСТУП")
                     .font(.caption)
                     .foregroundColor(.gray)
                     .padding(.horizontal)
-                
                 VStack {
                     HStack {
                         Image(systemName: "calendar")
-                            .foregroundColor(.pink)
+                            .foregroundColor(Color("primaryColor"))
                             .frame(width: 30)
-                        
                         Text("Доступ к календарю")
-                        
                         Spacer()
-                        
                         if accessGranted {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundColor(.green)
                         } else {
                             Button("Открыть настройки") {
-                                openSettings()
+                                viewModel.openSettings()
                             }
-                            .foregroundColor(.pink)
+                            .foregroundColor(Color("primaryColor"))
                         }
                     }
                     .padding()
                 }
-                .background(Color.white)
+                .background(Color("backgroundPrimary"))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color(.systemGray5), lineWidth: 1)
                 )
                 .padding(.horizontal)
             }
-            
-            // Секция внешнего вида
+
+            // -------- ВНЕШНИЙ ВИД --------
             VStack(alignment: .leading, spacing: 10) {
                 Text("ВНЕШНИЙ ВИД")
                     .font(.caption)
                     .foregroundColor(.gray)
+                    .padding([.horizontal, .top])
+
+                VStack(spacing: 0) {
+                    HStack {
+                        Image(systemName: "iphone")
+                            .foregroundColor(Color("primaryColor"))
+                            .frame(width: 30)
+                        Text("Следовать теме устройства")
+                        Spacer()
+                        Toggle("", isOn: $viewModel.followSystemTheme)
+                            .labelsHidden()
+                            .toggleStyle(SwitchToggleStyle(tint: Color("primaryColor")))
+                    }
+                    .padding(.vertical, 12)
                     .padding(.horizontal)
-                
-                VStack {
+
+                    Divider()
+                        .padding(.leading, 46)
+
                     HStack {
                         Image(systemName: "moon.fill")
-                            .foregroundColor(.pink)
+                            .foregroundColor(Color("primaryColor"))
                             .frame(width: 30)
-                        
-                        Text("Темная тема")
-                        
+                        Text("Тема приложения")
                         Spacer()
-                        
-                        Toggle("", isOn: $isDarkMode)
-                            .labelsHidden()
+                        Picker("", selection: Binding<AppTheme>(
+                            get: {
+                                // Если followSystemTheme — привязываем к системной теме, иначе — к ручной
+                                if viewModel.followSystemTheme {
+                                    return (colorScheme == .dark) ? .dark : .light
+                                } else {
+                                    return viewModel.selectedTheme
+                                }
+                            },
+                            set: { newValue in
+                                if !viewModel.followSystemTheme {
+                                    viewModel.selectedTheme = newValue
+                                }
+                            }
+                        )) {
+                            ForEach(AppTheme.allCases) { theme in
+                                Text(theme.title).tag(theme)
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                        .frame(width: 140)
+                        .disabled(viewModel.followSystemTheme)
                     }
-                    .padding()
+                    .padding(.vertical, 12)
+                    .padding(.horizontal)
                 }
-                .background(Color.white)
+                .background(Color("backgroundPrimary"))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color(.systemGray5), lineWidth: 1)
                 )
+                .cornerRadius(12)
                 .padding(.horizontal)
+                .padding(.bottom, 8)
             }
-            
-            // Секция о приложении
+
+            // -------- О ПРИЛОЖЕНИИ --------
             VStack(alignment: .leading, spacing: 10) {
                 Text("О ПРИЛОЖЕНИИ")
                     .font(.caption)
                     .foregroundColor(.gray)
                     .padding(.horizontal)
-                
                 VStack(spacing: 0) {
                     HStack {
                         Image(systemName: "info.circle")
-                            .foregroundColor(.pink)
+                            .foregroundColor(Color("primaryColor"))
                             .frame(width: 30)
-                        
                         Text("Версия приложения")
-                        
                         Spacer()
-                        
                         Text("1.0.0")
                             .foregroundColor(.gray)
                     }
                     .padding()
-                    
                     Divider()
                         .padding(.leading, 46)
-                    
                     NavigationLink(destination: PrivacyPolicyView()) {
                         HStack {
                             Image(systemName: "lock.shield")
-                                .foregroundColor(.pink)
+                                .foregroundColor(Color("primaryColor"))
                                 .frame(width: 30)
-                            
                             Text("Политика конфиденциальности")
-                            
                             Spacer()
-                            
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.gray)
                         }
@@ -126,15 +147,15 @@ struct SettingsView: View {
                         .foregroundColor(.primary)
                     }
                 }
-                .background(Color.white)
+                .background(Color("backgroundPrimary"))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color(.systemGray5), lineWidth: 1)
                 )
                 .padding(.horizontal)
             }
-            
-            // Кнопка сброса
+
+            // -------- СБРОС --------
             Button(action: {
                 showResetAlert = true
             }) {
@@ -142,66 +163,47 @@ struct SettingsView: View {
                     Image(systemName: "arrow.counterclockwise")
                         .foregroundColor(.red)
                         .frame(width: 30)
-                    
                     Text("Сбросить все напоминания")
                         .foregroundColor(.red)
-                    
                     Spacer()
                 }
                 .padding()
-                .background(Color.white)
+                .background(Color("backgroundPrimary"))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(Color(.systemGray5), lineWidth: 1)
                 )
                 .padding(.horizontal)
             }
-            
             Spacer()
         }
-        .background(Color.white.edgesIgnoringSafeArea(.all))
+        .background(Color("backgroundPrimary").edgesIgnoringSafeArea(.all))
         .alert(isPresented: $showResetAlert) {
             Alert(
                 title: Text("Сбросить напоминания"),
                 message: Text("Вы уверены, что хотите сбросить все настройки и напоминания? Это действие невозможно отменить."),
                 primaryButton: .destructive(Text("Сбросить")) {
-                    // Здесь будет код для сброса напоминаний
+                    viewModel.resetAllData()
                 },
                 secondaryButton: .cancel(Text("Отмена"))
             )
         }
         .navigationBarHidden(true)
-    }
-    
-    private func openSettings() {
-        if let url = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.open(url)
+        .onAppear {
+            Task { await viewModel.checkCalendarAccess() }
         }
-    }
-}
-
-// Представление политики конфиденциальности
-struct PrivacyPolicyView: View {
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Политика конфиденциальности")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                
-                Text("Приложение «Memorize Me» уважает вашу конфиденциальность и обрабатывает данные только локально на вашем устройстве. Мы не передаем никакие данные на сторонние серверы.")
-                
-                Text("Доступ к календарю")
-                    .font(.headline)
-                
-                Text("Приложение запрашивает доступ к вашему календарю исключительно для анализа событий и создания напоминаний. Все данные обрабатываются и хранятся только на вашем устройстве.")
+        .onChange(of: colorScheme) { newScheme in
+            // Автоматически подстраиваемся только если включено следование системе
+            if viewModel.followSystemTheme {
+                viewModel.setSystemTheme()
             }
-            .padding()
         }
-        .navigationTitle("Политика конфиденциальности")
     }
 }
 
 #Preview {
-    SettingsView(accessGranted: .constant(true))
+    SettingsView(
+        viewModel: SettingsViewModel(isCalendarAccessGranted: true),
+        accessGranted: .constant(true)
+    )
 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RequestCalendarAccessView: View {
     @Binding var accessGranted: Bool?
+    
     let calendarService = CalendarSyncService()
 
     var body: some View {
@@ -12,9 +13,9 @@ struct RequestCalendarAccessView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 120, height: 120)
-                .foregroundColor(.pink)
+                .foregroundColor(Color("primaryColor"))
                 .padding()
-                .background(Circle().fill(Color.pink.opacity(0.1)))
+                .background(Circle().fill(Color("primaryColor").opacity(0.1)))
 
             Text("Разрешите доступ к календарю")
                 .font(.title2)
@@ -28,8 +29,11 @@ struct RequestCalendarAccessView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
 
+            // Кнопки действий
             VStack(spacing: 15) {
+                // Кнопка отказа
                 Button(action: {
+                    // Устанавливаем статус доступа как отклоненный
                     accessGranted = false
                 }) {
                     HStack {
@@ -39,16 +43,19 @@ struct RequestCalendarAccessView: View {
                     .font(.system(size: 16, weight: .bold))
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .foregroundColor(.pink)
+                    .foregroundColor(Color("primaryColor"))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.pink, lineWidth: 2)
+                            .stroke(Color("primaryColor"), lineWidth: 2)
                     )
                     .cornerRadius(12)
                 }
 
+                // Кнопка разрешения
                 Button(action: {
+                    // Запрашиваем доступ к календарю
                     calendarService.requestAccess { granted in
+                        // Обновляем статус доступа
                         accessGranted = granted
                     }
                 }) {
@@ -59,7 +66,7 @@ struct RequestCalendarAccessView: View {
                     .font(.system(size: 16, weight: .bold))
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.pink)
+                    .background(Color("primaryColor"))
                     .foregroundColor(.white)
                     .cornerRadius(12)
                     .shadow(radius: 5)
@@ -69,6 +76,7 @@ struct RequestCalendarAccessView: View {
 
             Spacer()
         }
+        .background(Color("backgroundPrimary").edgesIgnoringSafeArea(.all))
     }
 }
 
