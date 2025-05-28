@@ -31,21 +31,21 @@ private extension Dictionary {
 }
 
 struct EventRanker {
-    static func topSpecials(from events: [EventModel], window: DateInterval, maxCount: Int = 20) -> [RankedEvent] {
+    static func topSpecials(from events: [EventModel], window: DateInterval, maxCount: Int = 20, isFullAnalysis: Bool = false, includeAnniversaries: Bool = false) -> [RankedEvent] {
         let actionKW = KeywordLoader.load("action_verbs")
         let greetKW = KeywordLoader.load("greeting_keywords")
         var output: [RankedEvent] = []
 
-        print("Анализируем \(events.count) событий")
+        print("Анализируем \(events.count) событий (полный анализ: \(isFullAnalysis), годовщины: \(includeAnniversaries))")
 
         for e in events where window.contains(e.startDate) {
             let text = (e.title + " " + (e.notes ?? "")).lowercased()
-            let (type, typeData) = classify(event: e, text: text, actionKW: actionKW, greetKW: greetKW)
+            let (type, typeData) = classify(event: e, text: text, actionKW: actionKW, greetKW: greetKW, includeAnniversaries: includeAnniversaries)
 
             var score = baseWeight(type)
             score += keywordScore(text, dict: (type == .greeting ? greetKW : actionKW))
             score += urgency(e.startDate, type: type)
-            score += randomBoost(e.id)
+            score += randomBoost(e.id, isFullAnalysis: isFullAnalysis)
 
             // Упростим: для throwback достаточно 25 баллов, для остальных 30
             let minScore = (type == .throwback ? 25 : 30)
@@ -53,38 +53,46 @@ struct EventRanker {
             output.append(.init(event: e, type: type, typeData: typeData, score: score))
         }
 
-        let result = output.sorted { $0.score > $1.score }.map { $0 }
+        let result = output.sorted { $0.score > $1.score }.prefix(maxCount).map { $0 }
 
         print("Отобрано \(result.count) значимых событий")
-        return result
+        return Array(result)
     }
 
-    private static func classify(event: EventModel, text: String, actionKW: [String: Int], greetKW: [String: Int]) -> (SignificantDateType, Int?) {
+    private static func classify(event: EventModel, text: String, actionKW: [String: Int], greetKW: [String: Int], includeAnniversaries: Bool) -> (SignificantDateType, Int?) {
         let today = Calendar.current.startOfDay(for: Date())
 
-        // throwback: событие прошло ≤ 365 дней назад
-        if event.startDate < today {
-            let daysBetween = Calendar.current.dateComponents([.day], from: event.startDate, to: today).day ?? 0
-            if daysBetween <= 365 && daysBetween > 0 {
-                return (.throwback, daysBetween)
-            }
-        }
-        // anniversary: событие прошло 1+ лет назад
-        if event.startDate < today {
+        // Годовщины: только если включен режим поиска годовщин И событие нерекуррентное
+        if includeAnniversaries && event.startDate < today && !event.isRecurring {
             let years = Calendar.current.dateComponents([.year], from: event.startDate, to: today).year ?? 0
             if years >= 1 {
                 return (.anniversary, years)
             }
         }
-        if greetKW.keys.contains(where: text.contains) {
-            return (.greeting, nil)
+        
+        // Остальная логика только для основного прохода
+        if !includeAnniversaries {
+            // throwback: событие прошло ≤ 365 дней назад
+            if event.startDate < today {
+                let daysBetween = Calendar.current.dateComponents([.day], from: event.startDate, to: today).day ?? 0
+                if daysBetween <= 365 && daysBetween > 0 {
+                    return (.throwback, daysBetween)
+                }
+            }
+            
+            if greetKW.keys.contains(where: text.contains) {
+                return (.greeting, nil)
+            }
+            if actionKW.keys.contains(where: text.contains) {
+                return (.action, nil)
+            }
+            if isPrettyDate(event.startDate) {
+                return (.prettyDate, nil)
+            }
+            return (.other, nil)
         }
-        if actionKW.keys.contains(where: text.contains) {
-            return (.action, nil)
-        }
-        if isPrettyDate(event.startDate) {
-            return (.prettyDate, nil)
-        }
+        
+        // Если это проход для годовщин, но событие не подошло, пропускаем
         return (.other, nil)
     }
 
@@ -110,8 +118,17 @@ struct EventRanker {
         return 15 - days / 2
     }
 
-    private static func randomBoost(_ id: String) -> Int {
-        return abs(id.hashValue) % 10
+    private static func randomBoost(_ id: String, isFullAnalysis: Bool) -> Int {
+        let baseBoost = abs(id.hashValue) % 10
+        
+        if isFullAnalysis {
+            // При полном анализе добавляем небольшую временную вариативность
+            let timeSeed = Int(Date().timeIntervalSince1970) % 1000
+            let timeBoost = (timeSeed + abs(id.hashValue)) % 8 - 4 // от -4 до +3
+            return max(0, baseBoost + timeBoost)
+        } else {
+            return baseBoost
+        }
     }
 
     private static func daysBetween(_ a: Date, _ b: Date) -> Int {

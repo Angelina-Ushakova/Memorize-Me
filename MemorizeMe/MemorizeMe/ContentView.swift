@@ -11,9 +11,8 @@ struct ContentView: View {
             .task {
                 await significantDateViewModel.initialize(modelContext: modelContext)
                 
-                if significantDateViewModel.shouldRefreshAnalysis() {
-                    await significantDateViewModel.refreshAnalysis(modelContext: modelContext)
-                }
+                // initialize уже включает логику shouldRefreshAnalysis и делает инкрементальное обновление
+                // Больше ничего дополнительно вызывать не нужно
             }
     }
 }

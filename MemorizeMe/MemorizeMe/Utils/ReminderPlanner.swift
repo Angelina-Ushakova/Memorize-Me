@@ -36,10 +36,12 @@ struct ReminderPlanner {
             return delta(from: r.event.startDate, weightedChoices: [(3, 0.4), (1, 0.4), (0, 0.2)])
 
         case .anniversary:
-            // годовщина: всегда ближайшая будущая, 08:00
+            // годовщина: всегда ближайшая будущая дата с таким же месяцем/днем, 08:00
             let baseDate = r.event.startDate
             let eventMonth = cal.component(.month, from: baseDate)
             let eventDay = cal.component(.day, from: baseDate)
+            
+            // Начинаем поиск с текущего года
             var nextAnniversary = cal.date(from: DateComponents(
                 year: cal.component(.year, from: today),
                 month: eventMonth,
@@ -47,9 +49,12 @@ struct ReminderPlanner {
                 hour: 8,
                 minute: 0
             ))!
+            
+            // Если дата уже прошла в этом году, переносим на следующий год
             if nextAnniversary < today {
                 nextAnniversary = cal.date(byAdding: .year, value: 1, to: nextAnniversary)!
             }
+            
             return nextAnniversary
 
         case .prettyDate:
@@ -91,11 +96,19 @@ struct ReminderPlanner {
     private static func deduplicateNotifications(_ notifications: [SignificantDate]) -> [SignificantDate] {
         var seen: [String: SignificantDate] = [:]
         for notification in notifications {
-            let key = "\(Calendar.current.startOfDay(for: notification.notificationDate))_\(notification.eventTitle)"
-            if seen[key] == nil {
-                seen[key] = notification
+            // Используем eventID как первичный ключ дедупликации
+            let primaryKey = notification.eventID
+            let dateKey = "\(Calendar.current.startOfDay(for: notification.notificationDate))_\(notification.eventTitle)"
+            
+            // Если события с таким ID еще нет, добавляем его
+            if seen[primaryKey] == nil && seen[dateKey] == nil {
+                seen[primaryKey] = notification
+                seen[dateKey] = notification
             }
         }
-        return Array(seen.values).sorted { $0.notificationDate < $1.notificationDate }
+        
+        // Возвращаем только уникальные значения
+        let uniqueNotifications = Array(Set(seen.values.map { $0 }))
+        return uniqueNotifications.sorted { $0.notificationDate < $1.notificationDate }
     }
 }

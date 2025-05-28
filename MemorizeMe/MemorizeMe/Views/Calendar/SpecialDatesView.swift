@@ -41,7 +41,7 @@ struct SpecialDatesView: View {
 
                     Button("Обновить анализ") {
                         Task {
-                            await significantDateViewModel.refreshAnalysis(modelContext: modelContext)
+                            await significantDateViewModel.incrementalRefreshAnalysis(modelContext: modelContext)
                         }
                     }
                     .buttonStyle(.borderedProminent)
@@ -94,7 +94,8 @@ struct SpecialDatesView: View {
         }
         .background(Color("backgroundPrimary").edgesIgnoringSafeArea(.all))
         .refreshable {
-            await significantDateViewModel.refreshAnalysis(modelContext: modelContext)
+            // Pull-to-refresh делает инкрементальное обновление
+            await significantDateViewModel.incrementalRefreshAnalysis(modelContext: modelContext)
         }
         .overlay(
             Group {

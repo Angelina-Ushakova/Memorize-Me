@@ -21,37 +21,67 @@ final class SignificantDateViewModel: ObservableObject {
         if status == .notDetermined {
             _ = await notificationService.requestPermission()
         }
+        
+        // При инициализации делаем инкрементальное обновление только если давно не обновлялись
+        if shouldRefreshAnalysis() {
+            await incrementalRefreshAnalysis(modelContext: modelContext)
+        }
     }
     
-    func refreshAnalysis(modelContext: ModelContext) async {
+    /// Полное обновление анализа - для ручного запуска через настройки
+    func fullRefreshAnalysis(modelContext: ModelContext) async {
         guard !isAnalyzing else { return }
         
         isAnalyzing = true
         analysisError = nil
         
         do {
-            await dateAnalysisService.refreshSpecialDates(modelContext: modelContext)
+            await dateAnalysisService.fullRefreshSpecialDates(modelContext: modelContext)
             await loadSpecialDates(modelContext: modelContext)
             await updateNotificationCount()
             lastAnalysisDate = Date()
         } catch {
             analysisError = error.localizedDescription
-            print("Ошибка анализа: \(error)")
+            print("Ошибка полного анализа: \(error)")
         }
         
         isAnalyzing = false
     }
     
+    /// Инкрементальное обновление - для автоматических обновлений
+    func incrementalRefreshAnalysis(modelContext: ModelContext) async {
+        guard !isAnalyzing else { return }
+        
+        isAnalyzing = true
+        analysisError = nil
+        
+        do {
+            await dateAnalysisService.incrementalRefreshSpecialDates(modelContext: modelContext)
+            await loadSpecialDates(modelContext: modelContext)
+            await updateNotificationCount()
+            lastAnalysisDate = Date()
+        } catch {
+            analysisError = error.localizedDescription
+            print("Ошибка инкрементального анализа: \(error)")
+        }
+        
+        isAnalyzing = false
+    }
+    
+    /// Для обратной совместимости - по умолчанию инкрементальное обновление
+    func refreshAnalysis(modelContext: ModelContext) async {
+        await incrementalRefreshAnalysis(modelContext: modelContext)
+    }
+    
     func loadSpecialDates(modelContext: ModelContext) async {
         specialDates = dateAnalysisService.getSpecialDates(modelContext: modelContext)
-        updateWidgetData() // <-- добавлено
+        updateWidgetData()
     }
     
     func deleteSpecialDate(_ specialDate: SignificantDate, modelContext: ModelContext) async {
         await dateAnalysisService.deleteSpecialDate(specialDate, modelContext: modelContext)
         await loadSpecialDates(modelContext: modelContext)
         await updateNotificationCount()
-        // updateWidgetData() не нужен, т.к. уже вызовется из loadSpecialDates
     }
     
     func getSpecialDatesForMonth(year: Int, month: Int, modelContext: ModelContext) -> [Date: [SignificantDate]] {
@@ -98,23 +128,27 @@ final class SignificantDateViewModel: ObservableObject {
     func updateWidgetData() {
         let appGroupID = "group.edu.hse.Ushakova.MemorizeMe"
         let userDefaults = UserDefaults(suiteName: appGroupID)
-        let upcoming = getUpcomingDates(limit: 3) // обязательно лимит 3!
+        let upcoming = getUpcomingDates(limit: 3)
+        
         for (idx, item) in upcoming.enumerated() {
             userDefaults?.set(item.eventTitle, forKey: "widgetTitle\(idx)")
             userDefaults?.set(item.notificationDate.timeIntervalSince1970, forKey: "widgetDate\(idx)")
             userDefaults?.set(item.type.description, forKey: "widgetType\(idx)")
         }
+        
         // Очищаем неиспользуемые слоты
         for idx in upcoming.count..<3 {
             userDefaults?.removeObject(forKey: "widgetTitle\(idx)")
             userDefaults?.removeObject(forKey: "widgetType\(idx)")
             userDefaults?.removeObject(forKey: "widgetDate\(idx)")
         }
+        
         if upcoming.isEmpty {
             userDefaults?.set("Нет напоминаний", forKey: "widgetTitle0")
             userDefaults?.set("Другое", forKey: "widgetType0")
             userDefaults?.set(Date().timeIntervalSince1970, forKey: "widgetDate0")
         }
+        
         userDefaults?.synchronize()
     }
 }
