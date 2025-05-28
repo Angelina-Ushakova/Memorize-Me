@@ -2,10 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UIAppFonts</key>
-	<array>
-		<string>Gilroy-Light.otf</string>
-		<string>Gilroy-ExtraBold.otf</string>
-	</array>
+    <key>CFBundleDisplayName</key>
+    <string>Memorize Me</string>
 </dict>
 </plist>

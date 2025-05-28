@@ -59,7 +59,7 @@ struct EventRanker {
         return Array(result)
     }
 
-    private static func classify(event: EventModel, text: String, actionKW: [String: Int], greetKW: [String: Int], includeAnniversaries: Bool) -> (SignificantDateType, Int?) {
+    static func classify(event: EventModel, text: String, actionKW: [String: Int], greetKW: [String: Int], includeAnniversaries: Bool) -> (SignificantDateType, Int?) {
         let today = Calendar.current.startOfDay(for: Date())
 
         // Годовщины: только если включен режим поиска годовщин И событие нерекуррентное
@@ -96,10 +96,10 @@ struct EventRanker {
         return (.other, nil)
     }
 
-    private static func baseWeight(_ type: SignificantDateType) -> Int {
+    static func baseWeight(_ type: SignificantDateType) -> Int {
         switch type {
-        case .greeting:     return 40
-        case .action:       return 30
+        case .greeting:     return 38
+        case .action:       return 28
         case .anniversary:  return 28
         case .prettyDate:   return 22
         case .throwback:    return 28
@@ -107,13 +107,13 @@ struct EventRanker {
         }
     }
 
-    private static func keywordScore(_ text: String, dict: [String: Int]) -> Int {
+    static func keywordScore(_ text: String, dict: [String: Int]) -> Int {
         return dict.reduce(0) { total, pair in
             total + (text.contains(pair.key) ? pair.value : 0)
         }
     }
 
-    private static func urgency(_ date: Date, type: SignificantDateType) -> Int {
+    static func urgency(_ date: Date, type: SignificantDateType) -> Int {
         let days = max(0, min(30, daysBetween(Date(), date)))
         return 15 - days / 2
     }

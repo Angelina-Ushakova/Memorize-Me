@@ -208,6 +208,43 @@ struct SettingsView: View {
                 }
                 .padding(.bottom, 20)
                 
+                // ТЕСТОВОЕ УВЕДОМЛЕНИЕ
+                // ------------------------------------
+//                Button(action: {
+//                    let content = UNMutableNotificationContent()
+//                    content.title = "Тестовое уведомление"
+//                    content.body = "Проверка работы push-уведомлений"
+//                    content.sound = .default
+//
+//                    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+//                    let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+//
+//                    UNUserNotificationCenter.current().add(request) { error in
+//                        if let error = error {
+//                            print("Ошибка: \(error.localizedDescription)")
+//                        } else {
+//                            print("Запрос добавлен")
+//                        }
+//                    }
+//                }) {
+//                    HStack {
+//                        Image(systemName: "bell.badge.fill")
+//                            .foregroundColor(Color("primaryColor"))
+//                            .frame(width: 30)
+//                        Text("Прислать тестовое уведомление")
+//                        Spacer()
+//                    }
+//                    .padding()
+//                    .background(Color("backgroundPrimary"))
+//                    .overlay(
+//                        RoundedRectangle(cornerRadius: 12)
+//                            .stroke(Color(.systemGray5), lineWidth: 1)
+//                    )
+//                    .padding(.horizontal)
+//                }
+//                .padding(.bottom, 20)
+                // ------------------------------------
+                
                 Spacer()
             }
             .background(Color("backgroundPrimary").edgesIgnoringSafeArea(.all))

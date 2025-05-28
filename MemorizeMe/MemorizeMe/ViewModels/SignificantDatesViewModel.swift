@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import SwiftUI
+import WidgetKit
 
 @MainActor
 final class SignificantDateViewModel: ObservableObject {
@@ -29,6 +30,7 @@ final class SignificantDateViewModel: ObservableObject {
     }
     
     /// Полное обновление анализа - для ручного запуска через настройки
+    @MainActor
     func fullRefreshAnalysis(modelContext: ModelContext) async {
         isAnalyzing = true
         analysisError = nil
@@ -39,6 +41,8 @@ final class SignificantDateViewModel: ObservableObject {
         lastAnalysisDate = Date()
 
         isAnalyzing = false
+        
+        WidgetCenter.shared.reloadAllTimelines()
     }
     
     /// Инкрементальное обновление - для автоматических обновлений
