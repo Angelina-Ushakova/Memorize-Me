@@ -10,8 +10,9 @@ struct YearlyCalendarView: View {
     @State private var didScrollToCurrentMonth = false
     @State private var lastScrolledYear: Int = Calendar.current.component(.year, from: Date())
 
-    @State private var selectedSpecialDate: SignificantDate?
+    @State private var selectedSpecialDates: [SignificantDate] = []
     @State private var showAlert = false
+    @State private var showMultipleAlert = false
 
     private var calendar: Calendar {
         var calendar = Calendar.current
@@ -65,9 +66,14 @@ struct YearlyCalendarView: View {
                                     monthNames: monthNames,
                                     weekdaySymbols: weekdaySymbols,
                                     specialDatesByDate: specialDatesByDate,
-                                    onSelectSpecialDate: { specialDate in
-                                        selectedSpecialDate = specialDate
-                                        showAlert = true
+                                    onSelectSpecialDates: { dates in
+                                        if dates.count > 1 {
+                                            selectedSpecialDates = dates
+                                            showMultipleAlert = true
+                                        } else if let first = dates.first {
+                                            selectedSpecialDates = [first]
+                                            showAlert = true
+                                        }
                                     }
                                 )
                                 .id(month)
@@ -111,7 +117,7 @@ struct YearlyCalendarView: View {
             )
             .padding(.horizontal)
 
-            if showAlert, let date = selectedSpecialDate {
+            if showAlert, let date = selectedSpecialDates.first {
                 SpecialDateAlertView(
                     specialDate: date,
                     onDelete: {
@@ -121,6 +127,18 @@ struct YearlyCalendarView: View {
                         }
                     },
                     onDismiss: { showAlert = false }
+                )
+            }
+            
+            if showMultipleAlert {
+                MultipleDatesAlertView(
+                    specialDates: selectedSpecialDates,
+                    onSelect: { selected in
+                        showMultipleAlert = false
+                        selectedSpecialDates = [selected]
+                        showAlert = true
+                    },
+                    onDismiss: { showMultipleAlert = false }
                 )
             }
         }
@@ -142,7 +160,7 @@ struct YearlyMonthView: View {
     let monthNames: [String]
     let weekdaySymbols: [String]
     let specialDatesByDate: [Date: [SignificantDate]]
-    var onSelectSpecialDate: (SignificantDate) -> Void
+    var onSelectSpecialDates: ([SignificantDate]) -> Void
 
     var body: some View {
         VStack(spacing: 8) {
@@ -161,39 +179,81 @@ struct YearlyMonthView: View {
                 }
             }
 
-            // Только дни месяца — никаких "серых" дней
             let daysInMonth = numberOfDaysInMonth(year: year, month: month)
             let firstDayOfMonth = calendar.date(from: DateComponents(year: year, month: month, day: 1))!
             let weekdayOfFirstDay = calendar.component(.weekday, from: firstDayOfMonth)
             let offsetDays = (weekdayOfFirstDay - calendar.firstWeekday + 7) % 7
 
             LazyVGrid(columns: Array(repeating: GridItem(.fixed(28)), count: 7), spacing: 4) {
-                // Добавить пустые ячейки в начале
                 ForEach(0..<offsetDays, id: \.self) { _ in
                     Text("")
                         .frame(width: 28, height: 28)
                 }
-                // Только реальные дни месяца
+                
                 ForEach(1...daysInMonth, id: \.self) { day in
                     let date = calendar.date(from: DateComponents(year: year, month: month, day: day))!
-                    let hasSpecialDate = specialDatesByDate.keys.contains(where: { calendar.isDate($0, inSameDayAs: date) })
                     let specialDates = specialDatesByDate.filter { calendar.isDate($0.key, inSameDayAs: date) }.flatMap { $0.value }
+                    
                     Button(action: {
-                        if let first = specialDates.first {
-                            onSelectSpecialDate(first)
+                        if !specialDates.isEmpty {
+                            onSelectSpecialDates(specialDates)
                         }
                     }) {
-                        Text("\(day)")
-                            .font(.system(size: 12))
-                            .frame(width: 28, height: 28)
-                            .background(
+                        ZStack {
+                            if specialDates.count == 1 {
                                 Circle()
-                                    .fill(hasSpecialDate ? Color(specialDates.first?.type.calendarColor ?? "primaryLight6") : Color.clear)
-                            )
-                            .foregroundColor(
-                                hasSpecialDate ? Color("textPrimary") :
-                                isToday(date) ? Color("primaryColor") : .primary
-                            )
+                                    .fill(Color(specialDates[0].type.calendarColor))
+                            } else if specialDates.count == 2 {
+                                Circle()
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                Color(specialDates[0].type.calendarColor),
+                                                Color(specialDates[1].type.calendarColor)
+                                            ]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                            } else if specialDates.count > 2 {
+                                // Многоцветный градиент для 3+ событий
+                                Circle()
+                                    .fill(
+                                        AngularGradient(
+                                            gradient: Gradient(colors: [
+                                                Color("primaryLight6"),
+                                                Color("lightOrange"),
+                                                Color("lightPurple"),
+                                                Color("primaryLight6")
+                                            ]),
+                                            center: .center
+                                        )
+                                    )
+                            }
+                            
+                            Text("\(day)")
+                                .font(.system(size: 12))
+                                .foregroundColor(
+                                    !specialDates.isEmpty ? Color("textPrimary") :
+                                    isToday(date) ? Color("primaryColor") : .primary
+                                )
+                            
+                            if specialDates.count > 1 {
+                                VStack {
+                                    HStack {
+                                        Spacer()
+                                        Text("\(specialDates.count)")
+                                            .font(.system(size: 6, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .padding(1)
+                                            .background(Circle().fill(Color.black.opacity(0.6)))
+                                            .offset(x: 2, y: -2)
+                                    }
+                                    Spacer()
+                                }
+                            }
+                        }
+                        .frame(width: 28, height: 28)
                     }
                 }
             }
