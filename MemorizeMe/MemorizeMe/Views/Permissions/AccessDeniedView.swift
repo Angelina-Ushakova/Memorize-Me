@@ -9,7 +9,7 @@ struct AccessDeniedView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 100, height: 100)
-                .foregroundColor(Color("primaryColor"))
+                .foregroundColor(Color("appPrimaryColor"))
 
             Text("Доступ запрещён")
                 .font(.title)
@@ -29,7 +29,7 @@ struct AccessDeniedView: View {
                 .font(.system(size: 16, weight: .bold))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color("primaryColor"))
+                .background(Color("appPrimaryColor"))
                 .foregroundColor(.white)
                 .cornerRadius(12)
                 .shadow(radius: 5)

@@ -3,6 +3,7 @@ import SwiftUI
 import EventKit
 
 /// Отвечает за проверку и запрос доступа к календарю.
+@MainActor
 final class RootViewModel: ObservableObject {
     @Published var calendarAccessStatus: Bool?
     private let calendarService = CalendarSyncService()

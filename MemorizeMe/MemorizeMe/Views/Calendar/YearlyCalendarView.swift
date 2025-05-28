@@ -94,7 +94,7 @@ struct YearlyCalendarView: View {
                             }
                         }
                     }
-                    .onChange(of: viewModel.currentYear) { newYear in
+                    .onChange(of: viewModel.currentYear) { _, newYear in
                         specialDatesByDate = viewModel.getSpecialDatesForYear(year: newYear, modelContext: modelContext)
                         if !didScrollToCurrentMonth && newYear == Calendar.current.component(.year, from: Date()) {
                             let nowMonth = Calendar.current.component(.month, from: Date())
@@ -167,7 +167,7 @@ struct YearlyMonthView: View {
             Text(monthNames[month-1])
                 .font(.title3)
                 .fontWeight(.semibold)
-                .foregroundColor(isCurrentMonth ? Color("primaryColor") : .primary)
+                .foregroundColor(isCurrentMonth ? Color("appPrimaryColor") : .primary)
                 .padding(.vertical, 8)
 
             HStack {
@@ -235,7 +235,7 @@ struct YearlyMonthView: View {
                                 .font(.system(size: 12))
                                 .foregroundColor(
                                     !specialDates.isEmpty ? Color("textPrimary") :
-                                    isToday(date) ? Color("primaryColor") : .primary
+                                    isToday(date) ? Color("appPrimaryColor") : .primary
                                 )
                             
                             if specialDates.count > 1 {
@@ -266,7 +266,7 @@ struct YearlyMonthView: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(isCurrentMonth ? Color("primaryColor").opacity(0.3) : Color.clear, lineWidth: 1)
+                .stroke(isCurrentMonth ? Color("appPrimaryColor").opacity(0.3) : Color.clear, lineWidth: 1)
         )
         .padding(.horizontal, 4)
         .padding(.vertical, 2)

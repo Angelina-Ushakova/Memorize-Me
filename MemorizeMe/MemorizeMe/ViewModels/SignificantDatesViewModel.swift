@@ -30,21 +30,14 @@ final class SignificantDateViewModel: ObservableObject {
     
     /// Полное обновление анализа - для ручного запуска через настройки
     func fullRefreshAnalysis(modelContext: ModelContext) async {
-        guard !isAnalyzing else { return }
-        
         isAnalyzing = true
         analysisError = nil
-        
-        do {
-            await dateAnalysisService.fullRefreshSpecialDates(modelContext: modelContext)
-            await loadSpecialDates(modelContext: modelContext)
-            await updateNotificationCount()
-            lastAnalysisDate = Date()
-        } catch {
-            analysisError = error.localizedDescription
-            print("Ошибка полного анализа: \(error)")
-        }
-        
+
+        await dateAnalysisService.fullRefreshSpecialDates(modelContext: modelContext)
+        await loadSpecialDates(modelContext: modelContext)
+        await updateNotificationCount()
+        lastAnalysisDate = Date()
+
         isAnalyzing = false
     }
     
@@ -55,15 +48,10 @@ final class SignificantDateViewModel: ObservableObject {
         isAnalyzing = true
         analysisError = nil
         
-        do {
-            await dateAnalysisService.incrementalRefreshSpecialDates(modelContext: modelContext)
-            await loadSpecialDates(modelContext: modelContext)
-            await updateNotificationCount()
-            lastAnalysisDate = Date()
-        } catch {
-            analysisError = error.localizedDescription
-            print("Ошибка инкрементального анализа: \(error)")
-        }
+        await dateAnalysisService.incrementalRefreshSpecialDates(modelContext: modelContext)
+        await loadSpecialDates(modelContext: modelContext)
+        await updateNotificationCount()
+        lastAnalysisDate = Date()
         
         isAnalyzing = false
     }

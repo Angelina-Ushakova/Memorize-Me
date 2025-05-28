@@ -104,7 +104,7 @@ struct MonthlyCalendarView: View {
                                 Text("\(dayInfo.day)")
                                     .font(.system(size: 16))
                                     .foregroundColor(!specialDates.isEmpty ? Color("textPrimary") :
-                                                        (isToday(dayInfo.date) ? Color("primaryColor") :
+                                                        (isToday(dayInfo.date) ? Color("appPrimaryColor") :
                                                             (!dayInfo.isCurrentMonth ? .gray : .primary)))
                                 
                                 // Индикатор количества событий

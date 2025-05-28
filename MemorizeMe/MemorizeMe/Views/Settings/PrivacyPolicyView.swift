@@ -74,9 +74,9 @@ struct PrivacyPolicyView: View {
                 }) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left")
-                            .foregroundColor(Color("primaryColor"))
+                            .foregroundColor(Color("appPrimaryColor"))
                         Text("Назад")
-                            .foregroundColor(Color("primaryColor"))
+                            .foregroundColor(Color("appPrimaryColor"))
                     }
                 }
             }

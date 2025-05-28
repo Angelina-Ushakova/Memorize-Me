@@ -12,6 +12,7 @@ enum AppTheme: String, CaseIterable, Identifiable {
     }
 }
 
+@MainActor
 final class SettingsViewModel: ObservableObject {
     @Published var isCalendarAccessGranted: Bool
     @Published var followSystemTheme: Bool = false {

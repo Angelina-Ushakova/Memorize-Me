@@ -6,11 +6,11 @@ struct SettingsView: View {
     @Binding var accessGranted: Bool
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var significantDateViewModel: SignificantDateViewModel
-
+    
     @Environment(\.colorScheme) var colorScheme
     @State private var showResetAlert = false
     @State private var showAnalysisTooltip = false
-
+    
     var body: some View {
         ZStack {
             VStack(spacing: 20) {
@@ -19,7 +19,7 @@ struct SettingsView: View {
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top)
-
+                
                 // АНАЛИЗ КАЛЕНДАРЯ
                 VStack(alignment: .leading, spacing: 10) {
                     Text("АНАЛИЗ")
@@ -30,7 +30,7 @@ struct SettingsView: View {
                     VStack(spacing: 0) {
                         HStack {
                             Image(systemName: "brain")
-                                .foregroundColor(Color("primaryColor"))
+                                .foregroundColor(Color("appPrimaryColor"))
                                 .frame(width: 30)
                             
                             Text("Полный анализ календаря")
@@ -57,7 +57,7 @@ struct SettingsView: View {
                                         await significantDateViewModel.fullRefreshAnalysis(modelContext: modelContext)
                                     }
                                 }
-                                .foregroundColor(Color("primaryColor"))
+                                .foregroundColor(Color("appPrimaryColor"))
                             }
                         }
                         .padding()
@@ -67,7 +67,7 @@ struct SettingsView: View {
                         
                         HStack {
                             Image(systemName: "calendar.badge.clock")
-                                .foregroundColor(Color("primaryColor"))
+                                .foregroundColor(Color("appPrimaryColor"))
                                 .frame(width: 30)
                             Text("Найдено значимых дат")
                             Spacer()
@@ -82,7 +82,7 @@ struct SettingsView: View {
                             
                             HStack {
                                 Image(systemName: "clock")
-                                    .foregroundColor(Color("primaryColor"))
+                                    .foregroundColor(Color("appPrimaryColor"))
                                     .frame(width: 30)
                                 Text("Последний анализ")
                                 Spacer()
@@ -99,34 +99,34 @@ struct SettingsView: View {
                     )
                     .padding(.horizontal)
                 }
-
+                
                 // ВНЕШНИЙ ВИД
                 VStack(alignment: .leading, spacing: 10) {
                     Text("ВНЕШНИЙ ВИД")
                         .font(.caption)
                         .foregroundColor(.gray)
                         .padding([.horizontal, .top])
-
+                    
                     VStack(spacing: 0) {
                         HStack {
                             Image(systemName: "iphone")
-                                .foregroundColor(Color("primaryColor"))
+                                .foregroundColor(Color("appPrimaryColor"))
                                 .frame(width: 30)
                             Text("Следовать теме устройства")
                             Spacer()
                             Toggle("", isOn: $viewModel.followSystemTheme)
                                 .labelsHidden()
-                                .toggleStyle(SwitchToggleStyle(tint: Color("primaryColor")))
+                                .toggleStyle(SwitchToggleStyle(tint: Color("appPrimaryColor")))
                         }
                         .padding(.vertical, 12)
                         .padding(.horizontal)
-
+                        
                         Divider()
                             .padding(.leading, 46)
-
+                        
                         HStack {
                             Image(systemName: "moon.fill")
-                                .foregroundColor(Color("primaryColor"))
+                                .foregroundColor(Color("appPrimaryColor"))
                                 .frame(width: 30)
                             Text("Тема приложения")
                             Spacer()
@@ -138,7 +138,7 @@ struct SettingsView: View {
                             .pickerStyle(SegmentedPickerStyle())
                             .frame(width: 140)
                             .disabled(viewModel.followSystemTheme)
-                            .onChange(of: viewModel.followSystemTheme) { followSystem in
+                            .onChange(of: viewModel.followSystemTheme) { _, followSystem in
                                 if followSystem {
                                     viewModel.selectedTheme = viewModel.currentTheme
                                 }
@@ -156,7 +156,7 @@ struct SettingsView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 8)
                 }
-
+                
                 // О ПРИЛОЖЕНИИ
                 VStack(alignment: .leading, spacing: 10) {
                     Text("О ПРИЛОЖЕНИИ")
@@ -167,7 +167,7 @@ struct SettingsView: View {
                         NavigationLink(destination: PrivacyPolicyView()) {
                             HStack {
                                 Image(systemName: "lock.shield")
-                                    .foregroundColor(Color("primaryColor"))
+                                    .foregroundColor(Color("appPrimaryColor"))
                                     .frame(width: 30)
                                 Text("Политика конфиденциальности")
                                 Spacer()
@@ -185,7 +185,7 @@ struct SettingsView: View {
                     )
                     .padding(.horizontal)
                 }
-
+                
                 // СБРОС
                 Button(action: {
                     showResetAlert = true
@@ -239,7 +239,7 @@ struct SettingsView: View {
             )
         }
         .navigationBarHidden(true)
-        .onChange(of: colorScheme) { newScheme in
+        .onChange(of: colorScheme) { _, _ in
             if viewModel.followSystemTheme {
                 viewModel.setSystemTheme()
                 viewModel.selectedTheme = viewModel.currentTheme
@@ -286,7 +286,7 @@ struct AnalysisTooltipView: View {
             // Заголовок
             HStack {
                 Image(systemName: "brain")
-                    .foregroundColor(Color("primaryColor"))
+                    .foregroundColor(Color("appPrimaryColor"))
                     .font(.title2)
                 
                 Text("Что делает полный анализ?")
@@ -354,7 +354,7 @@ struct TooltipBulletPoint: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(Color("primaryColor"))
+                .foregroundColor(Color("appPrimaryColor"))
                 .font(.system(size: 16))
                 .frame(width: 20, alignment: .center)
             

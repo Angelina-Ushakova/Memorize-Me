@@ -11,12 +11,10 @@ final class CalendarSyncService {
     /// Запрашивает у пользователя разрешение на доступ к календарю
     /// - Parameter completion: колбэк с результатом - `true`, если доступ разрешён
     func requestAccess(completion: @escaping (Bool) -> Void) {
-        eventStore.requestAccess(to: .event) { granted, error in
-            DispatchQueue.main.async {
-                completion(granted)
+            eventStore.requestFullAccessToEvents { granted, _ in
+                DispatchQueue.main.async { completion(granted) }
             }
         }
-    }
     
     /// Возвращает список событий за указанный период
     /// - Parameters:
@@ -46,7 +44,7 @@ final class CalendarSyncService {
         let status = EKEventStore.authorizationStatus(for: .event)
         // Возвращаем соответствующее значение в зависимости от статуса
         switch status {
-        case .authorized:
+        case .authorized, .fullAccess, .writeOnly:
             return true
         case .denied, .restricted:
             return false

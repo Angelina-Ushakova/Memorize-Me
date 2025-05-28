@@ -13,9 +13,9 @@ struct RequestCalendarAccessView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 120, height: 120)
-                .foregroundColor(Color("primaryColor"))
+                .foregroundColor(Color("appPrimaryColor"))
                 .padding()
-                .background(Circle().fill(Color("primaryColor").opacity(0.1)))
+                .background(Circle().fill(Color("appPrimaryColor").opacity(0.1)))
 
             Text("Разрешите доступ к календарю")
                 .font(.title2)
@@ -43,10 +43,10 @@ struct RequestCalendarAccessView: View {
                     .font(.system(size: 16, weight: .bold))
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .foregroundColor(Color("primaryColor"))
+                    .foregroundColor(Color("appPrimaryColor"))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color("primaryColor"), lineWidth: 2)
+                            .stroke(Color("appPrimaryColor"), lineWidth: 2)
                     )
                     .cornerRadius(12)
                 }
@@ -66,7 +66,7 @@ struct RequestCalendarAccessView: View {
                     .font(.system(size: 16, weight: .bold))
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color("primaryColor"))
+                    .background(Color("appPrimaryColor"))
                     .foregroundColor(.white)
                     .cornerRadius(12)
                     .shadow(radius: 5)

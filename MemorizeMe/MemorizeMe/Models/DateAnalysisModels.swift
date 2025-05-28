@@ -102,7 +102,7 @@ struct EventRanker {
         case .action:       return 30
         case .anniversary:  return 28
         case .prettyDate:   return 22
-        case .throwback:    return 25
+        case .throwback:    return 28
         case .other:        return 10
         }
     }

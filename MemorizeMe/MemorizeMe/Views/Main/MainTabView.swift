@@ -6,10 +6,10 @@ struct MainTabView: View {
     @Binding var accessGranted: Bool?
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var significantDateViewModel: SignificantDateViewModel
-
+    
     @StateObject private var calendarViewModel = CalendarViewModel()
     @StateObject private var settingsViewModel = SettingsViewModel(isCalendarAccessGranted: true) // Создаём один экземпляр
-
+    
     var body: some View {
         TabViewWithLine {
             TabView {
@@ -21,19 +21,19 @@ struct MainTabView: View {
                     .onAppear {
                         calendarViewModel.initialize(modelContext: modelContext)
                     }
-                    .onChange(of: calendarViewModel.currentMonth) { _ in
+                    .onChange(of: calendarViewModel.currentMonth) { _, _ in
                         calendarViewModel.loadSpecialDatesForCurrentMonth(modelContext: modelContext)
                     }
-                    .onChange(of: calendarViewModel.currentYear) { _ in
+                    .onChange(of: calendarViewModel.currentYear) { _, _ in
                         calendarViewModel.loadSpecialDatesForCurrentMonth(modelContext: modelContext)
                     }
-
+                
                 // Вкладка значимых дат
                 SpecialDatesView()
                     .tabItem {
                         Label("Напоминания", systemImage: "bell.badge")
                     }
-
+                
                 // Вкладка настроек
                 SettingsViewWithNavigation(
                     viewModel: settingsViewModel,
@@ -46,7 +46,7 @@ struct MainTabView: View {
                     Label("Настройки", systemImage: "gear")
                 }
             }
-            .accentColor(Color("primaryColor"))
+            .accentColor(Color("appPrimaryColor"))
         }
     }
 }
